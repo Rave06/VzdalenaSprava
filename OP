@@ -1,0 +1,96 @@
+Linux nastavení sítě:
+1)	Buď při instalaci – nejjednodušší
+2)	Přes nmtui – velmi nespolehlivé – navigace - Tab, Enter, šipky
+„sudo dnf install NetworkManager-tui“
+„nmtui“ – zapne nmtui
+3)	Příkazy v terminálu – Lepší než nmtui
+„nmcli connection show“ – vypíše síťový připojení.
+„sudo nmcli connection modify „název“ ipv4.method manual“ – přepne z DHCP na manuální statickou adresu.
+„sudo nmcli connection modify „název“ ipv4.addresses 172.16.0.254/16“ – nastavení adresy a masky sítě
+„sudo nmcli connection modify „název“ ipv4.gateway 172.16.0.2“ – nastavení výchozí brány
+„sudo nmcli connection modify „název“ ipv4.dns 8.8.8.8“ – nastavení DNS
+„sudo nmcli connection modify „ens160“ ipv4.method manual“ – nastaví, aby IPV4 byla pouze statická. Bez toho bude mít síťová karta DHCP adresu a tu kterou jsme přidali dohromady.
+„sudo ncmli connection up „název“ „ – restartuje síťovou kartu, aby se nastavení projevilo
+
+Nastavení LVM:
+	„sudo pvcreate /dev/sdb /dev/sdc“ – Physical Volume. Označíme jednotlivé disky pro práci s LVM
+	„sudo vgcreate datavg /dev/sdb /dev/sdc“ – Volume Group. Spojíme disky do jednoho celku jménem datavg.  
+„sudo lvcreate -l 100%FREE -n datalv datavg“ – Z Volume Group datavg vytvoříme svazek datalv s 100% volného místa.
+„sudo mkfs.xfs /dev/datavg/datalv“ – Vytvoříme filesystem xfs
+„sudo mkdir -p /mnt/data“ – vytvoření prázdné složky – přípojného bodu
+„sudo mount /dev/datavg/datalv /mnt/data“ – Svazek připojíme do naší prázdné složky.
+„sudo nano /etc/fstab“ – Aby se připojení uchovalo, musíme to zapsat do fstabu
+„/dev/datavg/datalv /mnt/data xfs defaults 0 0“ – vložíme do fstabu – „Při každém startu vezmi tento svazek, připoj ho do této složky, použij formát xfs a výchozí nastavení.“
+
+
+Abychom mohli měnit bezpečnostní kontexty pro SELinux, nainstalujeme si k tomu nejdřív nástroj: 
+„sudo dnf install policycoreutils-python-utils“
+
+Vzdálený přístup 
+SSH + SSH klíče	
+1.	Na Windows 11 otevřete Příkazový řádek a napište ssh-keygen. Vygeneruje se veřejný a soukromý klíč. Když se bude terminál ptát na heslo pro autentizaci SSH klíče, tak musíme zmáčknout pouze enter – nechat ho prázdné. Kdybychom heslo nastavili, tak by se při každé autentifikaci certifikátem terminál ptal i na heslo.
+Veřejný klíč nyní musíme umístit do souboru „authorized_keys“. Tento soubor musí být v adresáři ~/.ssh/. 
+~/ - zástupný znak pro domovskou složku (/home/jmenousera)
+.ssh – tečka před složkou znamená že složka je skrytá.
+Vytvoření: mkdir -p ~/.ssh – přepínač p v případě neexistují nadřazené složky tuto složku vytvoří
+nano ~/.ssh/authorized_keys – tímto vytvoříme v složce .ssh textový soubor „authorized_keys“
+Na Linuxu v souboru /etc/ssh/sshd_config změňte PasswordAuthentication z „yes“ na „no“ a restartujte službu SSH. Nyní se přihlásíte pouze s klíčem.
+SSH přihlášení: „ssh jmenousera@ipadresa“ – např: „ssh vojta@172.16.0.199“ Nejdříve se musíme přihlašovat pomocí hesla usera, za kterého se přihlašujeme. Po nastavení ssh certifikátu už ne.
+
+RDP
+Připojení z windowsu na linux.
+Ve windowsu nativně – není nutno instalovat.
+Na linuxu musíme nainstalovat. Například xrdp. 
+„Sudo dnf install xrdp“
+„sudo systemctl enable --now xrdp“ – zapne službu a zajistí že se bude zapínat vždy po zapnutí.
+„sudo firewall-cmd --permanent --add-port=3389/tcp“ – permanentní otevření portu 3389, na kterém RDP komunikuje.
+„sudo firewall-cmd –reload“ – restartuje firewall
+„sudo dnf install plasma-workspace-x11 xorg-x11-xinit“ – pokud to nefunguje, tak musíme doinstalovat programy napozadí pro kompatibilitu přenosu.
+
+Připojení z linuxu na windows
+Ve Windows 11 jděte do Nastavení > Systém > Vzdálená plocha (Remote Desktop).
+Přepněte přepínač Vzdálená plocha na Zapnuto a potvrďte.
+„sudo dnf install remmina remmina-plugins-rdp“ 
+V grafickém prostředí Fedory (KDE Plasma) si v menu aplikací najděte a spusťte program Remmina.
+Hned nahoře uvidíte adresní řádek (podobný jako ve webovém prohlížeči).
+Ujistěte se, že je vedle řádku z roletky vybráno RDP.
+Do řádku napište IP adresu vašeho Windows a stiskněte Enter.
+Vyskočí na vás okno s dotazem na jméno a heslo:
+Uživatelské jméno: Zadejte jméno, pod kterým se přihlašujete do Windows (pokud používáte Microsoft účet, musíte většinou zadat celý e-mail, např. jmeno@outlook.cz).
+Heslo: Vaše heslo do Windows.
+Remmina vás pravděpodobně upozorní na chybějící certifikát (úplně stejná situace, jako když jste se připojoval z Windows na Linux). Stačí kliknout na "Přijmout" (Accept).
+
+
+
+
+
+
+
+VNC
+Připojení z linuxu na windows
+„sudo dnf install remmina“ – pokud ještě nemáme, nainstalujeme Remminu.
+„sudo dnf install remmina remmina-plugins-vnc“ – nainstaluje remminu i s modulem VNC.
+„sudo firewall-cmd --permanent –add-port=5900/tcp“ – pro jistotu otevřeme port pro VNC
+„sudo firewall-cmd  --reload“ – restartujeme firewall službu
+Na windows stáhnout VNC server – TightVNC. Během instalace zakliknout nasinstalování TightVNC serveru – complete instalation. Také se bude ptát na heslo – tímto heslem se poté budeme připojovat.
+Poté jdeme do remminy, vybereme modul VNC, zadáme ip adresu windows a připojíme se. Zadáme heslo, co jsme nastavili ve windows serveru a hotovo. 
+Připojení z windowsu na linux
+„sudo dnf install tigervnc-server“ – instalace VNC serveru na linuxu
+„vncpasswd“ – vytvoříme heslo pro VNC server.
+Musíme systému říct, že "Displej číslo 1" patří vašemu uživateli. Otevřete konfigurační soubor:
+„sudo nano /etc/tigervnc/vncserver.users“ 
+Úplně na konec souboru přidejte tento řádek „:1=vojta“. Za „vojta“ napsat uživatelské jméno. Pozor! Musíme to napsat bez hashtagu. Hashtag je komentář.
+„sudo firewall-cmd --permanent --add-port=5901/tcp“ – otevřeme port 5901, na kterém běží displej 1 přenosu VNC
+„sudo firewall-cmd –reload“
+
+
+
+
+
+
+
+	
+
+
+
+
