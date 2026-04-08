@@ -72,6 +72,37 @@ Abychom mohli měnit bezpečnostní kontexty pro SELinux, nainstalujeme si k tom
 „sudo dnf install policycoreutils-python-utils“
 
 Vzdálený přístup 
+	Servery a klienti:
+		Server - Aplikace, do které se připojujeme (Ovládaný PC)
+		Klient - Aplikace, přes kterou se připojujeme (Ovládající PC)
+			Remmina - linux klient pro RDP, SSH, VNC. Funguje jako jedna aplikace, do které se doinstalovávají moduly pro jednotlivé protokoly.
+				„sudo dnf install remmina“
+				„sudo dnf install remmina remmina-plugins-vnc“ – nainstaluje remminu i s modulem VNC.
+		RDP
+			Windows RDP klient
+				Je nativně nainstalovaný a zapnutý
+			Windows RDP Server
+				Je nativně nainstalovaný, ale je to nutné ho zapnout
+				Ve Windows 11 jděte do Nastavení > Systém > Vzdálená plocha (Remote Desktop).
+				Přepněte přepínač Vzdálená plocha na Zapnuto a potvrďte.
+			Linux RDP Server
+				"sudo dnf install xrdp"
+			Linux RDP Klient
+				Řešíme přes Remminu
+				„sudo dnf install remmina remmina-plugins-rdp“ 
+		VNC
+			Linux VNC klient
+				Řešíme přes Remminu
+				„sudo dnf install remmina remmina-plugins-vnc“ – nainstaluje remminu i s modulem VNC.
+			Linux VNC server
+				TigerVNC
+				"sudo dnf install tigervnc-server"
+			Windows VNC server
+				-TightVNC
+			Windows VNC klient
+				-RealVNC Viewer
+
+
 	SSH + SSH klíče	
 		1.	Na Windows 11 otevřete Příkazový řádek a napište ssh-keygen. Vygeneruje se veřejný a soukromý klíč. Když se bude terminál ptát na heslo pro autentizaci SSH klíče, tak musíme zmáčknout pouze enter – nechat ho prázdné (pokud chceme ověřování bez hesla). 
 		Kdybychom heslo nastavili, tak by se při každé autentifikaci certifikátem terminál ptal i na heslo.
