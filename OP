@@ -67,6 +67,12 @@ Nastavení LVM:
 	„sudo nano /etc/fstab“ – Aby se připojení uchovalo, musíme to zapsat do fstabu
 	„/dev/datavg/datalv /mnt/data xfs defaults 0 0“ – vložíme do fstabu – „Při každém startu vezmi tento svazek, připoj ho do této složky, použij formát xfs a výchozí nastavení.“
 
+Samba:
+	Nainstalujte Sambu: sudo apt install samba.
+	Vytvořte složku na vašem LVM disku: mkdir /mnt/data/share.
+	Upravte soubor /etc/samba/smb.conf a na konec přidejte definici sdílení (cesta ke složce, práva atd.).
+	Nastavte uživateli heslo pro Sambu: sudo smbpasswd -a uzivatel.
+
 
 Abychom mohli měnit bezpečnostní kontexty pro SELinux, nainstalujeme si k tomu nejdřív nástroj: 
 „sudo dnf install policycoreutils-python-utils“
