@@ -74,48 +74,51 @@ Samba:
 	Nastavte uživateli heslo pro Sambu: sudo smbpasswd -a uzivatel.
 
 Nastavení Ngnix serveru:
+	Pokud Nginx nemáme, nainstalujeme si ho:
+		sudo dnf install nginx
+	
 	Toto je konkrétní nastavení pro dva různé weby běžící na portech 8080 a 8081.
-	Nejdříve si vytvoříme samotné index.html soubory, které budou weby číst. Musíme je vytvořit mimo /home adresář, jinak SELinux k nim zakáže přístup.
-	"sudo mkdir -p /var/www/web1 /var/www/web2" - tímto vytvoříme složky "web1" a "web2", do kterých dáme soubor index.html, který bude web zobrazovat. Standardně se používá cesta
-	/var/www/. Teoreticky by soubory mohly být umístěny například i v rootu, ale je to bezpečnostní rizko, jelikož bychom nginxu nastavili přístup do celého systému. Zároveň by nás tam SELinux nechtěl pustit.
-	echo "<h1>Web 1 běží na 8080</h1>" | sudo tee /var/www/web1/index.html
-	echo "<h1>Web 2 běží na 8081</h1>" | sudo tee /var/www/web2/index.html - Tyto dva příkazy do našich adresářů nahrají text odlišující dva weby. Lze to samozřejmě udělat i ručně.
+		Nejdříve si vytvoříme samotné index.html soubory, které budou weby číst. Musíme je vytvořit mimo /home adresář, jinak SELinux k nim zakáže přístup.
+		"sudo mkdir -p /var/www/web1 /var/www/web2" - tímto vytvoříme složky "web1" a "web2", do kterých dáme soubor index.html, který bude web zobrazovat. Standardně se používá cesta
+		/var/www/. Teoreticky by soubory mohly být umístěny například i v rootu, ale je to bezpečnostní rizko, jelikož bychom nginxu nastavili přístup do celého systému. Zároveň by nás tam SELinux nechtěl pustit.
+		echo "<h1>Web 1 běží na 8080</h1>" | sudo tee /var/www/web1/index.html
+		echo "<h1>Web 2 běží na 8081</h1>" | sudo tee /var/www/web2/index.html - Tyto dva příkazy do našich adresářů nahrají text odlišující dva weby. Lze to samozřejmě udělat i ručně.
 
 	Nyní musíme nakonfigurovat Nginx a říct mu, kde si má soubory vzít:
-	/etc/nginx/conf.d/ - v této složce si vytvoříme dva soubory pro dva weby, které budou určovat jejich nastavení. Např.: web1.conf a web2.conf
-	Nyní do těchto dvou souborů vložíme konfiguraci: (samozřejmě nezapomeneme změnit porty a soubory pro jednotlivé weby)
-	server {
-    listen 8080;
-    root /var/www/web1;
-    index index.html;
-	}
-	Po uložení si můžeme nastavení zkontrolovat pomocí "sudo nginx -t". Pokud zde budeme mít nějaké syntatické chyby, upozorní nás to.
+		/etc/nginx/conf.d/ - v této složce si vytvoříme dva soubory pro dva weby, které budou určovat jejich nastavení. Např.: web1.conf a web2.conf
+		Nyní do těchto dvou souborů vložíme konfiguraci: (samozřejmě nezapomeneme změnit porty a soubory pro jednotlivé weby)
+		server {
+	    listen 8080;
+	    root /var/www/web1;
+	    index index.html;
+		}
+		Po uložení si můžeme nastavení zkontrolovat pomocí "sudo nginx -t". Pokud zde budeme mít nějaké syntatické chyby, upozorní nás to.
 
 	Teď si otevřeme porty, na kterých chceme weby provozovat (jestli to už nemáme).
-	sudo firewall-cmd --permanent --add-port=8080/tcp
-	sudo firewall-cmd --permanent --add-port=8081/tcp
-	sudo firewall-cmd --list-all 	-Pro kontrolu
-	sudo firewall-cmd --reload
+		sudo firewall-cmd --permanent --add-port=8080/tcp
+		sudo firewall-cmd --permanent --add-port=8081/tcp
+		sudo firewall-cmd --list-all 	-Pro kontrolu
+		sudo firewall-cmd --reload
 
 	Nastavíme porty také pro SELinux:
-	sudo semanage port -a -t http_port_t -p tcp 8080
-	sudo semanage port -a -t http_port_t -p tcp 8081
+		sudo semanage port -a -t http_port_t -p tcp 8080
+		sudo semanage port -a -t http_port_t -p tcp 8081
 
 	Protože SELinux je mrdka, musíme mu říct, že ty soubory jsou určený pro nginx web. Těmito příkazy to uděláme trvale:
-	# Trvalé zapsání do databáze SELinuxu
-	sudo semanage fcontext -a -t httpd_sys_content_t "/var/www/web1(/.*)?"
-	sudo semanage fcontext -a -t httpd_sys_content_t "/var/www/web2(/.*)?"
-
-	# Aplikace štítků na existující soubory
-	sudo restorecon -Rv /var/www/
+		# Trvalé zapsání do databáze SELinuxu
+		sudo semanage fcontext -a -t httpd_sys_content_t "/var/www/web1(/.*)?"
+		sudo semanage fcontext -a -t httpd_sys_content_t "/var/www/web2(/.*)?"
+	
+		# Aplikace štítků na existující soubory
+		sudo restorecon -Rv /var/www/
 
 	Jako poslední musíme Nginxu nastavit práva pro práci se soubory, co má zobrazit:
-	sudo chmod -R 755 /var/www/web1
-	sudo chmod -R 755 /var/www/web2
-	Konkrétně mu nastavíme read a execute. Execute proto, aby se prokouzal přes adresáře až k souboru a read, aby si ho přečetl a zobrazil.
+		sudo chmod -R 755 /var/www/web1
+		sudo chmod -R 755 /var/www/web2
+		Konkrétně mu nastavíme read a execute. Execute proto, aby se prokouzal přes adresáře až k souboru a read, aby si ho přečetl a zobrazil.
 
 	Nakonec službu restartujeme:
-	sudo systemctl restart nginx
+		sudo systemctl restart nginx
 
 Abychom mohli měnit bezpečnostní kontexty pro SELinux, nainstalujeme si k tomu nejdřív nástroj: 
 „sudo dnf install policycoreutils-python-utils“
