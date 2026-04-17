@@ -25,7 +25,7 @@ rm (remove) – Smazání souborů.
 	-f - Vynucené smazání (bez ptaní). Pozor: Nezvratná operace.
 
 Instalace GUI na linux
-	"sudo dnf install @kde-desktop-environment"
+	"sudo dnf install @kde-desktop"
 	"startplasma-wayland"
 
 Práce s firewallem:
