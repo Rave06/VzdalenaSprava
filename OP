@@ -219,7 +219,21 @@ Vzdálený přístup
 			„sudo firewall-cmd --permanent --add-port=5901/tcp“ – otevřeme port 5901, na kterém běží displej 1 přenosu VNC
 			„sudo firewall-cmd –reload“
 
+	SCP, SFTP
+		SCP i SFTP 
+			Protokoly pro kopírování souborů pracující přes SSH. 
 
+		WinSCP - Windows klient pro SCP i SFTP
+			Prostě stáhnout, nainstalovat.
+			Hostitel - IP adresa stroje, na který se připojumeme.
+			Uživatelské jméno - user, za kterého se na daném stroji připojujeme
+			Heslo - heslo toho usera, za kterého se připojujeme
+			U SCP i SFTP číslo portu 22 (SSH).
+		FileZilla - Klient SCP, SFTP pro windows i linux
+		OpenSSH - Server SCP, SFTP server většinou předinstalovaný v linuxu (Fedora)
+			pokud ne - "sudo dnf install openssh-server"
+			
+			
 
 
 
