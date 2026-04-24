@@ -234,7 +234,7 @@ Vzdálený přístup
 
 		OpenSSH - Server SCP, SFTP server většinou předinstalovaný v linuxu (Fedora); Ve windowsu nutno nainstalovat
 			Linux
-				"sudo dnf install openssh-server" - 
+				"sudo dnf install openssh-server"
 			Windows
 				Aplikace -> Volitelné součásti -> Zobrazit funkce -> Dostupné funkce -> Server OpenSSH -> otevřít Služby nebo "services.msc". - 
 				-> Najít položku OpenSSH SSH Server -> Vlastnosti -> typ spouštění na "automaticky" - nyní se server zapne vždy se startem systému
@@ -265,11 +265,21 @@ Vzdálený přístup
 
 		FTP linux server
 			vsftpd - very secure FTP Daemon.
+			"sudo dnf install vsftpd"
+			"sudo systemctl enable --now vsftpd" - povolíme a zapneme vždy při startu systému (i nyní)
+			Konfigurace je uložena v /etc/vsftpd/vsftpd.conf 
+			V ní musí být odkomentováno/přidáno:
+			"anonymous_enable=NO"
+			"local_enable=YES"
+			"write_enable=YES"
+			"chroot_local_user=YES"
+			Úplně na konec souboru dáme: allow_writeable_chroot=YES
+			"sudo systemctl restart vsftpd" - Službu restartujeme
+			"sudo setsebool -P ftpd_full_access 1" - Povolíme oprávnění pro SELinux
+			"sudo firewall-cmd --add-service=ftp --permanent"
+			"sudo firewall-cmd --reload"
+			Teď nám běží FTP server a můžeme na něj připojit například z windowsu z Filezilly.
 			
-
-
-
-
 
 	
 
